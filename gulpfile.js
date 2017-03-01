@@ -30,10 +30,14 @@ var gulp 			= require('gulp'),
 /**
  * CSS tasks
  */
- gulp.task('icons', function() {
+gulp.task('icons',['assets'], function() {
     return gulp.src('./bower_components/components-font-awesome/fonts/**.*')
        	.pipe(gulp.dest('./dist/fonts'));
- });
+});
+gulp.task('assets', function() {
+    return gulp.src('./src/assets/**')
+       	.pipe(gulp.dest('./dist/assets'));
+});
 gulp.task('css:vendor', ['icons'], function(){
 	return gulp.src(mainBowerFiles('**/*.css'))
 		.pipe(sourcemaps.init())

@@ -30,5 +30,8 @@
     "angular-resource": "^1.6.2",
     "angular-sanitize": "^1.6.2",
     "components-font-awesome": "^4.7.0"
+  },
+  "devDependencies": {
+    "angular-mocks": "^1.6.2"
   }
 }

@@ -4,7 +4,7 @@
   "description": "Angular1,Gulp,Karma stack followed the Jhonpapa's Angular Style Guide",
   "main": "index.js",
   "scripts": {
-    "test": "gulp test",
+    "test": "karma start",
     "start": "gulp start"
   },
   "repository": "https://github.com/oxy-code/ng1-init",
@@ -31,7 +31,10 @@
     "gulp-sourcemaps": "^2.4.1",
     "gulp-uglify": "^2.0.1",
     "jasmine": "^2.5.3",
+    "jasmine-core": "^2.5.2",
     "karma": "^1.4.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.2",
     "main-bower-files": "^2.13.1"
   }
 }

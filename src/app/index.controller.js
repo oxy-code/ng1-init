@@ -8,9 +8,9 @@
         .controller('IndexController', IndexController);
 
     /* @ngInject */
-    function IndexController($scope) {
+    function IndexController() {
         var vm = this;
-        //console.log('IndexController')
+        vm.title = 'IndexController';
 
         ////////////////
 
