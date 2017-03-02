@@ -20,7 +20,7 @@ var gulp 			= require('gulp'),
 		'./src/**/*.filter.js',
 		'./src/**/*.directive.js',
 		'./src/**/*.service.js',
-		'./src/**/*.factiry.js',
+		'./src/**/*.factory.js',
 		'./src/**/*.provider.js',
 		'./src/**/*.controller.js'
 	],

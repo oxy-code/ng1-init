@@ -1,17 +1,16 @@
-describe('ng1-init TEST SUITE', function(){
-	describe('Testing IndexController', function(){
-		it('should initialize the title in the scope', function(){
+describe('ng1-init TEST SUITE\n', function(){
+	describe('Testing IndexController\n', function(){
+		it('\tshould initialize the title in the scope\n', function(){
 			module('ng1-init');
 
-			var scope = {};
-			var ctrl;
+			var vm;
 
 			inject(function($controller){
-				ctrl = $controller('IndexController', {this: scope});
+				vm = $controller('IndexController');
 			});
 
-			expect(scope.title).toBeDefined();
-			expect(scope.title).toBe('IndexController');
+			expect(vm.title).toBeDefined();
+			expect(vm.title).toBe('IndexController');
 		});
 	});
 });
