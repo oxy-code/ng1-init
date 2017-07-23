@@ -11,17 +11,18 @@ var gulp 			= require('gulp'),
 	browserSync 	= require('browser-sync'),
 	browserSyncSpa 	= require('browser-sync-spa'),
 	mainBowerFiles 	= require('main-bower-files'),
+	modRewrite	= require('connect-modrewrite'),
 
-	appCssFiles = './src/**/*.css',
+	appCssFiles = './src/**/*.scss',
 	appJsFiles = [
 		'./src/**/*.module.js',
 		'./src/**/*.config.js',
 		'./src/**/*.run.js',
+		'./src/**/*.provider.js',
 		'./src/**/*.filter.js',
 		'./src/**/*.directive.js',
 		'./src/**/*.service.js',
 		'./src/**/*.factory.js',
-		'./src/**/*.provider.js',
 		'./src/**/*.controller.js'
 	],
 	indexFile = './src/index.html';
@@ -30,7 +31,7 @@ var gulp 			= require('gulp'),
 /**
  * CSS tasks
  */
-gulp.task('icons',['assets'], function() {
+gulp.task('icons', function() {
     return gulp.src('./bower_components/components-font-awesome/fonts/**.*')
        	.pipe(gulp.dest('./dist/fonts'));
 });
@@ -38,34 +39,18 @@ gulp.task('assets', function() {
     return gulp.src('./src/assets/**')
        	.pipe(gulp.dest('./dist/assets'));
 });
-gulp.task('css:vendor', ['icons'], function(){
-	return gulp.src(mainBowerFiles('**/*.css'))
+gulp.task('vendor', function(){
+	
+	gulp.src(mainBowerFiles('**/*.css'))
 		.pipe(sourcemaps.init())
 		.pipe(cleanCSS({compatibility: 'ie8'}, function(details){
-			console.log('[css:vendor:minify] ('+details.name+') Time taken: '+details.stats.timeSpent + ' ms');
+			//console.log('[css:vendor:minify] ('+details.name+') Time taken: '+details.stats.timeSpent + ' ms');
 		}))
 		.pipe(concat('vendor.min.css'))
 		.pipe(sourcemaps.write('maps'))
 		.pipe(gulp.dest('dist/css'));
-})
 
-gulp.task('css:app', function() {
-	return gulp.src(appCssFiles)
-		.pipe(sourcemaps.init())
-		.pipe(cleanCSS({compatibility: 'ie8'}, function(details){
-			console.log('[css:app:minify] ('+details.name+') Time taken: '+details.stats.timeSpent + ' ms');
-		}))
-		.pipe(concat('app.min.css'))
-		.pipe(sourcemaps.write('maps'))
-		.pipe(gulp.dest('dist/css'))
-		.pipe(browserSync.stream());
-});
-
-/**
- * JS tasks
- */
-gulp.task('js:vendor', function() {
-	gulp.src(mainBowerFiles('**/*.js', {debugging: false}), { read: true })
+	return gulp.src(mainBowerFiles('**/*.js', {debugging: false}), { read: true })
 		.pipe(sourcemaps.init())
 		.pipe(uglify({mangle: true}).on('error', function(err) {
 			console.log('[Error]', err.toString());
@@ -73,10 +58,11 @@ gulp.task('js:vendor', function() {
 		.pipe(concat('vendor.min.js'))
 		.pipe(sourcemaps.write('maps'))
 		.pipe(gulp.dest('./dist/js'));
-});
+})
 
-gulp.task('js:app', function() {
-	gulp.src(appJsFiles)
+gulp.task('app',['app:css'], function() {
+
+	return gulp.src(appJsFiles)
 		.pipe(sourcemaps.init())
 		.pipe(ngAnnotate({remove: true, add: true, single_quotes: true}).on('error', function(Err){
 			console.log('[SyntaxError]', Err.message)
@@ -89,23 +75,19 @@ gulp.task('js:app', function() {
 		.pipe(gulp.dest('./dist/js'));
 });
 
-/**
- * HTML tasks
- */
-gulp.task('html', ['html:app'], function() {
-	var css = gulp.src('./dist/css/*.css', {read: false}),
-		vendor = gulp.src('./dist/js/vendor*.js', {read: false}),
-		app = gulp.src('./dist/js/app*.js', {read: false});
-	return gulp.src(indexFile)
-		.pipe(inject(css, {ignorePath: '/dist/', addRootSlash: false}))
-		.pipe(inject(vendor, {name: 'vendor', ignorePath: '/dist/',addRootSlash: false}))
-		.pipe(inject(app, {name: 'app', ignorePath: '/dist/',addRootSlash: false}))
-		.pipe(inject(gulp.src('./dist/templates.js', {read: false}), {name: 'partials', ignorePath: '/dist/',addRootSlash: false
+gulp.task('app:css', function(){
+	gulp.src(appCssFiles)
+		.pipe(sourcemaps.init())
+		.pipe(cleanCSS({compatibility: 'ie8'}, function(details){
+			//console.log('[css:app:minify] ('+details.name+') Time taken: '+details.stats.timeSpent + ' ms');
 		}))
-		.pipe(gulp.dest('./dist/'));
+		.pipe(concat('app.min.css'))
+		.pipe(sourcemaps.write('maps'))
+		.pipe(gulp.dest('dist/css'))
+		.pipe(browserSync.stream());
 });
 
-gulp.task('html:app', function(){
+gulp.task('templates', function(){
 	return gulp.src('./src/app/**/*.html')
 		.pipe(htmlmin({
             collapseWhitespace: true,
@@ -121,6 +103,22 @@ gulp.task('html:app', function(){
 });
 
 /**
+ * HTML tasks
+ */
+gulp.task('html', function() {
+	var css = gulp.src('./dist/css/*.css', {read: false}),
+		vendor = gulp.src('./dist/js/vendor*.js', {read: false}),
+		app = gulp.src('./dist/js/app*.js', {read: false});
+	return gulp.src(indexFile)
+		.pipe(inject(css, {ignorePath: '/dist/', addRootSlash: false}))
+		.pipe(inject(vendor, {name: 'vendor', ignorePath: '/dist/',addRootSlash: false}))
+		.pipe(inject(app, {name: 'app', ignorePath: '/dist/',addRootSlash: false}))
+		.pipe(inject(gulp.src('./dist/templates.js', {read: false}), {name: 'partials', ignorePath: '/dist/',addRootSlash: false
+		}))
+		.pipe(gulp.dest('./dist/'));
+});
+
+/**
  * BUILD tasks
  */
 gulp.task('clean', function(cb){
@@ -129,49 +127,44 @@ gulp.task('clean', function(cb){
 	], cb);
 });
 
-gulp.task('css', ['css:vendor'], function() {
-	return gulp.start(['css:app']);
-});
-
-gulp.task('js', ['js:vendor'], function() {
-	return gulp.start(['js:app']);
-});
-
-gulp.task('build', ['css', 'js'], function() {
-	return gulp.start(['html']);
-});
-
-gulp.task('browser-sync', ['build'], function() {
+gulp.task('browser-sync',['html'], function() {
 	return browserSync.init({
 		open: false,
 		server: {
 			baseDir: 'dist',
+			middleware: [
+				modRewrite([
+				  '!\\.\\w+$ /index.html [L]'
+				])
+			]
 		},
 		ui: false,
 		reloadDelay: 2000,
 		reloadOnRestart: true,
-		injectChanges: true // inject css changes
+		injectChanges: false // inject css changes
 	});
 });
 
-gulp.task('inject-reload:js', ['js:app', 'html'], function ()
+gulp.task('inject-reload:js',['app','html'], function ()
 {
-    browserSync.reload();
+	gulp.start('app');
+	gulp.start('html');
+  browserSync.reload();
 });
 
-gulp.task('inject-reload:css', ['css:app'], function ()
+gulp.task('inject-reload:css',['app:css'], function ()
 {
-    browserSync.reload();
+  browserSync.reload();
 });
 
-gulp.task('inject-reload:html', ['html'], function ()
+gulp.task('inject-reload:html', ['templates'], function ()
 {
-    browserSync.reload();
+  browserSync.reload();
 });
 
-gulp.task('start', ['browser-sync'], function() {
-	gulp.watch(['./src/**/*.css'], ['inject-reload:css']);
+gulp.task('start', ['icons','assets','vendor','app','templates'], function() {
+	gulp.watch(['./src/**/*.scss'], ['inject-reload:css']);
 	gulp.watch(['./src/**/*.js'], ['inject-reload:js']);
 	gulp.watch(['./src/app/**/*.html'], ['inject-reload:html']);
-	return;
+	gulp.start('browser-sync');
 });
